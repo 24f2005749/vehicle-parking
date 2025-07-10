@@ -1,0 +1,30 @@
+<nav class="navbar bg-dark navbar-expand-lg">
+    <div class="image">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="logo" width="125" height="auto">
+    </div>
+    <div class="container-fluid">
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active text-white fw-bold" aria-current="page" href="/admin">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white fw-bold" href="/admin/users">Users</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white fw-bold" href="/admin/summary">Summary</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white fw-bold" href="/logout">Logout</a>
+          </li>
+          <li class="nav-item position-absolute start-50 translate-middle-x">
+            <a class="nav-link text-info fw-bold">Welcome to Admin Dashboard!</a>
+          </li>
+        </ul>
+        <form class="d-flex mb-0" role="search">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+  </nav>

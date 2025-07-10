@@ -1,0 +1,18 @@
+<nav class="navbar bg-dark navbar-expand-lg">
+  <div class="image">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="logo" width="125" height="auto">
+  </div>
+
+  <div class="container-fluid">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active text-white fw-bold" aria-current="page" href="{{url_for('login')}}">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white fw-bold" href="{{url_for('register')}}">Register</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
