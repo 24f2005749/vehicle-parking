@@ -1,14 +1,56 @@
 {% extends "layout.html" %}
 
-{%block title%}
+{% block title %}
 Home page
-{% endblock%}
-
+{% endblock %}
 
 {% include "nav.html" %}
 
-
-
 {% block content %}
-this is home page
+<style>
+    .scroll-half {
+        height: 70vh;
+        overflow-y: auto;
+    }
+</style>
+
+<!-- Recent Parkings -->
+<div class="display-6 text-center mt-4 mb-4 text-white">Recent Parkings</div>
+
+<div class="scroll-half px-3">
+    <div class="card bg-dark text-white mb-3">
+        <div class="card-body">
+            <div class="row fw-bold">
+                <div class="col-1">ID</div>
+                <div class="col-2">Location</div>
+                <div class="col-2">Vehicle Number</div>
+                <div class="col-5">Time of Parking</div>
+                <div class="col-2">Action</div>
+            </div>
+        </div>
+    </div>
+
+    {% for user in users %}
+    <div class="card bg-dark text-white mb-2">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-1">{{ user.u_id }}</div>
+                <div class="col-2">{{ user.username }}</div>
+                <div class="col-2">{{ user.u_name }}</div>
+                <div class="col-5">{{ user.u_add }}</div>
+                <div class="col-2">{{ user.u_pin }}</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<a href="/book">
+  <button type="button" class="btn btn-success position-fixed bottom-0 end-0 m-5">
+  + Book Parking Spot
+</button>
+</a>
+
+
+
 {% endblock %}

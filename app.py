@@ -8,7 +8,7 @@ app.config.from_object(Config)
 
 db.init_app(app)
 
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
 @app.before_request
 def make_session_permanent():

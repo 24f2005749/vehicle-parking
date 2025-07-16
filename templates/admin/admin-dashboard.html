@@ -1,6 +1,225 @@
 {% extends "layout.html" %}
 {% include "admin/nav-admin.html" %}
 
-{% block content %}
+{% block style %}
+<style>
+  .modal-backdrop.show:nth-of-type(even) {
+    z-index: 1055;
+  }
 
+  .modal-backdrop.show:nth-of-type(odd) {
+    z-index: 1050;
+  }
+
+  .modal.show:nth-of-type(2) {
+    z-index: 1060;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="display-6 text-center mt-4">Parking Management</div>
+
+<div class="d-flex flex-wrap ">
+  {% for lot in lots %}
+  <div class="card m-3 bg-dark text-white" style="width: 18rem;">
+    <div class="card-body ">
+      <div class="d-flex ">
+        <h5 class="card-title me-4 ">Parking Lot - {{ lot.pl_id }}</h5>
+        <button type="button" class="btn btn-link p-0 ms-3 mt-1" data-bs-toggle="modal" data-bs-target="#editLot{{lot.pl_id}}">
+          <i class="fa-solid fa-lg fa-pen-to-square"></i>
+        </button>
+        <form method="POST" action="/admin/delete/{{ lot.pl_id }}" class="ms-2">
+          <button type="submit" class="btn btn-link text-danger p-0 mt-3" onclick="return confirm('Are you sure?')">
+            <i class="fa-solid fa-lg fa-trash"></i>
+          </button>
+        </form>
+      </div>
+      <h6 class="card-subtitle mb-2 text-white">{{ lot.pl_location }}</h6>
+      <a class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#detailsModal{{lot.pl_id}}">
+        View Details
+      </a>
+    </div>
+  </div>
+
+  <!-- Parking Lot Details Modal -->
+  <div class="modal fade" id="detailsModal{{lot.pl_id}}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" style="position: fixed; top: 10%; left: 2%; margin: 0; width: 60%;">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title">Parking Lot {{lot.pl_id}} Details</h5>
+        </div>
+
+        <div class="modal-body" style="height: 70vh; overflow-y: auto;">
+          <div class="d-flex"><span class="fw-bold me-1">Address:</span>
+            <p>{{lot.pl_add}}, {{lot.pl_pin}}</p>
+          </div>
+
+          <div class="d-flex">
+            <span class="fw-bold me-1">Total Spots:</span>
+            <p>{{lot.pl_spots}}</p>
+            <span class="fw-bold ms-3 me-1" style="color: #00c853;">Available Spots:</span>
+            {% set navail = 0 %}
+            {% for spot in spots %}
+              {% if spot.pl_id == lot.pl_id and not spot.ps_status %}
+                {% set navail = navail + 1 %}
+              {% endif %}
+            {% endfor %}
+            <p>{{lot.pl_spots - navail}}</p>
+            <span class="fw-bold ms-3 me-1 "style="color:#ff5252">Occupied Spots:</span>
+            <p>{{navail}}</p>
+          </div>
+
+          <div class="d-flex"><span class="fw-bold me-1">Price:</span>
+            <p>₹ {{lot.pl_price}}/hr</p>
+          </div>
+
+          <div class="d-flex flex-wrap mt-3">
+            {% for spot in spots %}
+              {% if spot.pl_id == lot.pl_id %}
+                {% set status = "success" if not spot.ps_status else "danger" %}
+                <div
+                  class="d-flex ms-4 mb-3 justify-content-center align-items-center bg-{{status}} bg-opacity-25 border border-{{status}} rounded-3 fw-bold text-{{status}}"
+                  style="width: 80px; height: 80px; cursor:pointer;"
+                  onclick="openStackedModal('detailsSpot{{spot.ps_id}}')">
+                  {{ spot.ps_id }}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Lot Modal -->
+  <div class="modal fade" id="editLot{{lot.pl_id}}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Parking Lot {{lot.pl_id}}</h5>
+        </div>
+        <div class="modal-body">
+          <form method="post" action="/admin/edit/{{ lot.pl_id }}" class="d-flex flex-column">
+            <label class="form-label">Location
+              <input type="text" name="location" value="{{lot.pl_location}}" class="form-control bg-dark text-white border border-secondary" required>
+            </label>
+            <label class="form-label">Address
+              <input type="text" name="address" value="{{lot.pl_add}}" class="form-control bg-dark text-white border border-secondary" required>
+            </label>
+            <label class="form-label">Pin code
+              <input type="number" name="pincode" value="{{lot.pl_pin}}" class="form-control bg-dark text-white border border-secondary" required>
+            </label>
+            <label class="form-label">Price per hour
+              <input type="number" name="price" value="{{lot.pl_price}}" class="form-control bg-dark text-white border border-secondary" required>
+            </label>
+            <label class="form-label">Maximum spots
+              <input type="number" name="numspots" value="{{lot.pl_spots}}" class="form-control bg-dark text-white border border-secondary" required>
+            </label>
+            <button type="submit" class="btn btn-success mt-3">Save</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-close-white" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Add Parking Lot Modal -->
+<button type="button" class="btn btn-success position-fixed bottom-0 end-0 m-5" data-bs-toggle="modal" data-bs-target="#addLot">
+  + Add Parking Lot
+</button>
+
+<div class="modal fade" id="addLot" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">New Parking Lot</h5>
+      </div>
+      <div class="modal-body">
+        <form method="post" class="d-flex flex-column">
+          <label class="form-label">Location
+            <input type="text" name="location" class="form-control bg-dark text-white border border-secondary" required>
+          </label>
+          <label class="form-label">Address
+            <input type="text" name="address" class="form-control bg-dark text-white border border-secondary" required>
+          </label>
+          <label class="form-label">Pin code
+            <input type="number" name="pincode" class="form-control bg-dark text-white border border-secondary" required>
+          </label>
+          <label class="form-label">Price per hour
+            <input type="number" name="price" class="form-control bg-dark text-white border border-secondary" required>
+          </label>
+          <label class="form-label">Maximum spots
+            <input type="number" name="numspots" class="form-control bg-dark text-white border border-secondary" required>
+          </label>
+          <button type="submit" class="btn btn-success mt-3">Save</button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-close-white" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Spot Modals -->
+{% for spot in spots %}
+<div class="modal fade" id="detailsSpot{{spot.ps_id}}" tabindex="-1">
+  <div class="modal-dialog modal-lg" style="position: fixed; top: 14%; right: 2%; margin: 0; width: 35%;">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Parking Spot {{spot.ps_id}} Details</h5>
+      </div>
+      <div class="modal-body">
+        <form class="d-flex flex-column">
+          <label class="form-label">Spot ID
+            <input type="text" value="{{spot.ps_id}}" class="form-control border border-secondary" readonly>
+          </label>
+          <label class="form-label">Status
+            <input type="text" value="{{ 'Occupied' if spot.ps_status else 'Available' }}" class="form-control border border-secondary" readonly>
+          </label>
+          <label class="form-label">Customer ID
+            <input type="text" value="{{ 'Occupied' if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
+          </label>
+          <label class="form-label">Vehicle Number
+            <input type="text" value="{{ 'Occupied' if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
+          </label>
+          <label class="form-label">Date of Parking
+            <input type="text" value="{{ '02-02-2006' if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
+          </label>
+          <label class="form-label">Estimated Parking Cost
+            <input type="text" value="{{ 'Occupied' if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
+          </label>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block script %}
+<script>
+  function openStackedModal(id) {
+    const topModal = document.getElementById(id);
+    const modal = new bootstrap.Modal(topModal, {
+      backdrop: true,
+      keyboard: true,
+      focus: false
+    });
+    modal.show();
+  }
+</script>
 {% endblock %}

@@ -35,7 +35,7 @@ def admin_required(f):
 def home():
     name = session["name"] if "name" in session else session["username"]
     return render_template("home.html",name=name)
-
+    
 
 
 @app.route("/login",methods=["GET","POST"])
@@ -102,13 +102,40 @@ def register():
     else:
         return render_template("auth/register.html")
 
+@app.route("/book")
+@login_required
+def book():
+    render_template("book.html")
+
 
 #! Admin routes
 
-@app.route("/admin")
+@app.route("/admin",methods=["GET","POST"])
 @admin_required
 def admin():
-    return render_template("admin/admin-dashboard.html")
+    if request.method=="POST":
+        pl_location = request.form.get("location")
+        pl_add = request.form.get("address")
+        pl_pin = int(request.form.get("pincode"))
+        pl_price = int(request.form.get("price"))
+        pl_spots = int(request.form.get("numspots"))
+
+        parkinglot=ParkingLot(pl_location=pl_location,pl_add=pl_add,pl_pin=pl_pin,pl_price=pl_price,pl_spots=pl_spots)
+        db.session.add(parkinglot)
+        db.session.flush()
+
+        for i in range(pl_spots):
+            spot=ParkingSpot(pl_id=parkinglot.pl_id)
+            db.session.add(spot)
+
+        db.session.commit()
+        return redirect(url_for("admin"))
+    else:
+        lots = ParkingLot.query.all()              
+        spots = ParkingSpot.query.all()
+
+       
+        return render_template("admin/admin-dashboard.html", lots=lots, spots=spots)
 
 @app.route("/admin/summary")
 @admin_required
@@ -118,9 +145,33 @@ def adminSummary():
 @app.route("/admin/users")
 @admin_required
 def viewUsers():
-    return render_template("admin/users.html")
+    users=User.query.all()
+    return render_template("admin/users.html",users=users)
 
-@app.route("/admin/edit")
+@app.route("/admin/edit/<int:pl_id>",methods=["POST"])
 @admin_required
-def admEdit():
-    return render_template("admin/edit.html")
+def editLot(pl_id):
+    lot = ParkingLot.query.filter_by(pl_id=pl_id).first()
+    if not lot:
+        flash("Parking lot not found.", "danger")
+        return redirect(url_for("admin"))
+    
+    lot.pl_location = request.form.get("location")
+    lot.pl_add = request.form.get("address")
+    lot.pl_pin = int(request.form.get("pincode"))
+    lot.pl_price = int(request.form.get("price"))
+    lot.pl_spots = int(request.form.get("numspots"))
+
+    db.session.commit()
+
+    flash("Parking lot updated successfully.", "success")
+    return redirect(url_for("admin"))
+
+@app.route("/admin/delete/<int:pl_id>", methods=["POST"])
+@admin_required
+def deleteLot(pl_id):
+    lot = ParkingLot.query.get_or_404(pl_id)
+    db.session.delete(lot)
+    db.session.commit()
+    return redirect(url_for("admin"))
+

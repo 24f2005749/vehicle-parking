@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% include "admin/nav-admin.html" %}
+
+{% block style %}
+<style>
+ 
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="display-6 text-center mt-4 text-white">Registered Users</div>
+
+<div class="container-fluid px-5 mt-4">
+
+  <div class="card bg-dark text-white mb-3">
+    <div class="card-body">
+      <div class="row fw-bold">
+        <div class="col-1">ID</div>
+        <div class="col-2">Email</div>
+        <div class="col-2">Full Name</div>
+        <div class="col-5">Address</div>
+        <div class="col-2">Pin Code</div>
+      </div>
+    </div>
+  </div>
+
+  {% for user in users %}
+  <div class="card bg-dark text-white mb-2">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-1">{{ user.u_id }}</div>
+        <div class="col-2">{{ user.username }}</div>
+        <div class="col-2">{{ user.u_name }}</div>
+        <div class="col-5">{{ user.u_add }}</div>
+        <div class="col-2">{{ user.u_pin }}</div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}
+
+
+{% block script %}{% endblock %}
