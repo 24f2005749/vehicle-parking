@@ -1,6 +1,10 @@
 {% extends "layout.html" %}
 {% include "admin/nav-admin.html" %}
 
+{% block title %}
+Admin Dashboard
+{% endblock %}
+
 {% block style %}
 <style>
   .modal-backdrop.show:nth-of-type(even) {
@@ -65,9 +69,9 @@
                 {% set navail = navail + 1 %}
               {% endif %}
             {% endfor %}
-            <p>{{lot.pl_spots - navail}}</p>
-            <span class="fw-bold ms-3 me-1 "style="color:#ff5252">Occupied Spots:</span>
             <p>{{navail}}</p>
+            <span class="fw-bold ms-3 me-1 "style="color:#ff5252">Occupied Spots:</span>
+            <p>{{lot.pl_spots - navail}}</p>
           </div>
 
           <div class="d-flex"><span class="fw-bold me-1">Price:</span>
@@ -187,16 +191,16 @@
             <input type="text" value="{{ 'Occupied' if spot.ps_status else 'Available' }}" class="form-control border border-secondary" readonly>
           </label>
           <label class="form-label">Customer ID
-            <input type="text" value="{{ 'Occupied' if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
+            <input type="text" value="{{ spot.ps_customerid if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
           </label>
           <label class="form-label">Vehicle Number
-            <input type="text" value="{{ 'Occupied' if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
+            <input type="text" value="{{ spot.ps_vehiclenum if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
           </label>
           <label class="form-label">Date of Parking
-            <input type="text" value="{{ '02-02-2006' if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
+            <input type="text" value="{{ spot.ps_datetime.strftime('%Y-%m-%d at %H:%M') if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
           </label>
           <label class="form-label">Estimated Parking Cost
-            <input type="text" value="{{ 'Occupied' if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
+            <input type="text" value="{{ (spot.ps_endtime-spot.ps_datetime).total_seconds() / 3600* lot_prices[spot.pl_id]  if spot.ps_status else 'Not Applicable' }}" class="form-control border border-secondary" readonly>
           </label>
         </form>
       </div>

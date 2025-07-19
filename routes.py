@@ -2,6 +2,7 @@ from flask import Flask,render_template,request,redirect,flash,url_for,session
 from models.models import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from datetime import timedelta
 
 app = Flask(__name__)
 
@@ -33,8 +34,13 @@ def admin_required(f):
 @app.route("/")
 @login_required
 def home():
-    name = session["name"] if "name" in session else session["username"]
-    return render_template("home.html",name=name)
+    name = session.get("name") if "name" in session else session.get("username")
+    username = session.get("username")
+    user = User.query.filter_by(username=username).first()
+    bookings=[]
+    if user:
+        bookings=Reservation.query.filter_by(user_id=user.u_id)
+    return render_template("home.html",name=name,bookings=bookings)
     
 
 
@@ -61,7 +67,7 @@ def login():
             session['username'] = user.username
             session['name'] = user.u_name
             flash("Logged in","success")
-            return redirect("/")
+            return redirect(url_for("home"))
         
         flash('Invalid credentials', 'danger')
         return redirect(url_for("login"))
@@ -98,15 +104,88 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         flash("User created successfully","success")
-        return redirect("/login")
+        return redirect(url_for("login"))
     else:
         return render_template("auth/register.html")
 
-@app.route("/book")
-@login_required
+@app.route("/book", methods=["GET", "POST"])
 def book():
-    render_template("book.html")
+    lots = []
+    searched = False
 
+    if request.method == "POST":
+        pincode = request.form.get("pincode")
+        lots = ParkingLot.query.filter_by(pl_pin=pincode).all()
+        searched = True
+    
+    for lot in lots:
+        free_spot = ParkingSpot.query.filter_by(pl_id=lot.pl_id, ps_status=False).first()
+        lot.free_spot = free_spot 
+
+    username=session.get("username")
+    user=User.query.filter_by(username=username).first()
+    customer_id=user.u_id
+    return render_template("book.html", lots=lots, searched=searched,customer_id=customer_id)
+
+@app.route("/book/<int:pl_id>", methods=["POST"])
+@login_required
+def book_now(pl_id):
+    vehicle = request.form.get("vehicle")
+    duration = request.form.get("duration")
+    spot_id = request.form.get("spot_id")  
+    
+    username = session.get("username")
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        flash("User not found", "danger")
+        return redirect(url_for("book"))
+
+    spot = ParkingSpot.query.filter_by(ps_id=spot_id, pl_id=pl_id, ps_status=False).first()
+    if not spot:
+        flash("No spot is available at the lot right now", "warning")
+        return redirect(url_for("book"))
+    
+    end_time = ist_now() + timedelta(hours=int(duration))
+
+    spot.ps_status = True
+    spot.ps_customerid = user.u_id
+    spot.ps_vehiclenum = vehicle
+    spot.ps_endtime = end_time
+    spot.ps_datetime = ist_now()
+
+    
+    reservation = Reservation(
+        user_id=user.u_id,
+        ps_id=spot.ps_id,
+        start_time=ist_now(),
+        end_time=end_time,
+        status=True
+    )
+
+    db.session.add(reservation)
+    db.session.commit()
+
+    flash(f"Spot {spot.ps_id} successfully booked!", "success")
+    return redirect(url_for("book"))
+
+@app.route("/release/<int:r_id>", methods=["POST"])
+@login_required
+def release(r_id):
+    reservation=Reservation.query.filter_by(r_id=r_id).first()
+
+    reservation.endtime=ist_now()
+    reservation.status=False
+
+    spot=ParkingSpot.query.filter_by(ps_id=reservation.ps_id).first()
+
+    spot.ps_status = False
+    spot.ps_customerid = None
+    spot.ps_vehiclenum = None
+    spot.ps_endtime = None
+    spot.ps_datetime = None
+
+    db.session.commit()
+    return redirect(url_for("home"))
 
 #! Admin routes
 
@@ -133,9 +212,10 @@ def admin():
     else:
         lots = ParkingLot.query.all()              
         spots = ParkingSpot.query.all()
+        lot_prices = {lot.pl_id: lot.pl_price for lot in lots}
 
-       
-        return render_template("admin/admin-dashboard.html", lots=lots, spots=spots)
+        
+        return render_template("admin/admin-dashboard.html", lots=lots, spots=spots, lot_prices=lot_prices)
 
 @app.route("/admin/summary")
 @admin_required

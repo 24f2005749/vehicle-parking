@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Home page
+User Dashboard
 {% endblock %}
 
 {% include "nav.html" %}
@@ -30,15 +30,22 @@ Home page
         </div>
     </div>
 
-    {% for user in users %}
+    {% for booking in bookings %}
     <div class="card bg-dark text-white mb-2">
         <div class="card-body">
             <div class="row">
-                <div class="col-1">{{ user.u_id }}</div>
-                <div class="col-2">{{ user.username }}</div>
-                <div class="col-2">{{ user.u_name }}</div>
-                <div class="col-5">{{ user.u_add }}</div>
-                <div class="col-2">{{ user.u_pin }}</div>
+                <div class="col-1">{{ booking.u_id }}</div>
+                <div class="col-2"></div>
+                <div class="col-2"></div>
+                <div class="col-5">{{ booking.start_time.strftime('%Y-%m-%d at %H:%M') }}</div>
+                <div class="col-2">
+                    <form action="{{'/release/' + booking.r_id|string if booking.status else '/'}}" method="post">
+                        <button type="submit" class="btn btn-{{'secondary' if not booking.status else 'danger'}} m-0"
+                            {{'disabled' if not booking.status}}>{{ "Release" if booking.status else "Parked Out"
+                            }}</button>
+                    </form>
+                </div>
+
             </div>
         </div>
     </div>
@@ -46,11 +53,10 @@ Home page
 </div>
 
 <a href="/book">
-  <button type="button" class="btn btn-success position-fixed bottom-0 end-0 m-5">
-  + Book Parking Spot
-</button>
+    <button type="button" class="btn btn-success position-fixed bottom-0 end-0 m-5">
+        + Book Parking Spot
+    </button>
 </a>
-
 
 
 {% endblock %}

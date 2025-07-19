@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+{% include "nav.html" %}
+
+{% block title %}
+Booking Page
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-white">
+  <h2 class="text-center mb-4">Find a Parking Spot</h2>
+
+  <form method="POST" class="mb-4">
+    <div class="input-group w-50 mx-auto">
+      <input type="number" name="pincode" class="form-control bg-dark text-white border-secondary"
+        placeholder="Enter your pincode" required>
+      <button class="btn btn-success" type="submit">Search</button>
+    </div>
+  </form>
+
+  {% if lots %}
+  <div class="bg-dark border border-secondary rounded p-3">
+    <div class="row fw-bold text-success border-bottom border-secondary pb-2 mb-2">
+      <div class="col-2">Lot ID</div>
+      <div class="col-5">Address</div>
+      <div class="col-3">Location</div>
+      <div class="col-2">Action</div>
+    </div>
+
+    {% for lot in lots %}
+    <div class="row mb-2">
+      <div class="col-2">{{ lot.pl_id }}</div>
+      <div class="col-5">{{ lot.pl_add }}, {{ lot.pl_pin }}</div>
+      <div class="col-3">{{ lot.pl_location }}</div>
+
+      <div class="col-2">
+        <button data-bs-toggle="modal" data-bs-target="#book{{lot.pl_id}}" class="btn btn-sm btn-primary">Book
+          Now</button>
+      </div>
+    </div>
+
+<div class="modal fade" id="book{{ lot.pl_id }}" tabindex="-1" aria-labelledby="bookLabel{{ lot.pl_id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border border-secondary">
+      <div class="modal-header">
+        <h5 class="modal-title" id="bookLabel{{ lot.pl_id }}">Book Parking Spot - Lot {{ lot.pl_id }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form method="POST" action="/book/{{ lot.pl_id }}">
+        <div class="modal-body">
+
+         
+          <div class="mb-3">
+            <label class="form-label">Customer ID</label>
+            <input type="number" class="form-control bg-dark text-white border-secondary" value="{{customer_id}}" name="customer_id" readonly>
+          </div>
+
+          
+          <div class="mb-3">
+            <label class="form-label">Lot ID</label>
+            <input type="number" class="form-control bg-dark text-white border-secondary" name="lot_id" value="{{ lot.pl_id }}" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Spot ID</label>
+            <input type="text" class="form-control bg-dark text-white border-secondary" name="spot_id"
+              value="{{ lot.free_spot.ps_id if lot.free_spot else 'Not available' }}" readonly>
+          </div>
+
+       
+          <div class="mb-3">
+            <label class="form-label">Vehicle Number</label>
+            <input type="text" class="form-control bg-dark text-white border-secondary" name="vehicle" required>
+          </div>
+
+         
+          <div class="mb-3">
+            <label class="form-label">Duration (in hours)</label>
+            <input type="number" min="1" class="form-control bg-dark text-white border-secondary" name="duration" required>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success" {% if not lot.free_spot %}disabled{% endif %}>Confirm Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+{% endfor %}
+</div>
+{% elif searched %}
+<div class="text-center text-warning">No parking lots found for the entered pincode.</div>
+{% endif %}
+</div>
+
+</div>
+{% endblock %}
