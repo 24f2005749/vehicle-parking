@@ -21,23 +21,41 @@ User Dashboard
     <div class="card bg-dark text-white mb-3">
         <div class="card-body">
             <div class="row fw-bold">
-                <div class="col-1">ID</div>
+                <div class="col-1">S.no</div>
                 <div class="col-2">Location</div>
                 <div class="col-2">Vehicle Number</div>
-                <div class="col-5">Time of Parking</div>
+                <div class="col-2">Time of Parking</div>
+                <div class="col-2">Duration</div>
+                <div class="col-1">Price</div>
                 <div class="col-2">Action</div>
             </div>
         </div>
     </div>
 
     {% for booking in bookings %}
+
     <div class="card bg-dark text-white mb-2">
         <div class="card-body">
             <div class="row">
-                <div class="col-1">{{ booking.u_id }}</div>
-                <div class="col-2"></div>
-                <div class="col-2"></div>
-                <div class="col-5">{{ booking.start_time.strftime('%Y-%m-%d at %H:%M') }}</div>
+                <div class="col-1">{{ loop.index }} {# Starts at 1 #}</div>
+                <div class="col-2">{{ booking.lot_location if booking.ps and booking.ps.lot else 'N/A' }}</div>
+                <div class="col-2">{{ booking.vehicle_number if booking.vehicle_number else 'N/A' }}</div>
+                {% set duration = booking.end_time - booking.start_time if not booking.status else None %}
+                <div class="col-2">{{ booking.start_time.strftime('%d %b %Y, %I:%M %p') }}</div>
+                <div class="col-2">
+                    {% if duration %}
+                    {{ duration.seconds // 3600 }}h {{ (duration.seconds % 3600) // 60 }}m
+                    {% else %}
+                    -
+                    {% endif %}
+                </div>
+                <div class="col-1">
+                    {% if duration %}
+                    ₹{{ '%.2f' | format((duration.total_seconds() / 3600) * booking.lot_price) }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </div>
                 <div class="col-2">
                     <form action="{{'/release/' + booking.r_id|string if booking.status else '/'}}" method="post">
                         <button type="submit" class="btn btn-{{'secondary' if not booking.status else 'danger'}} m-0"
@@ -49,6 +67,7 @@ User Dashboard
             </div>
         </div>
     </div>
+
     {% endfor %}
 </div>
 

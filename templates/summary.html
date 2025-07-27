@@ -1,0 +1,94 @@
+{% extends 'layout.html' %}
+{% block title %}
+User Summary
+{% endblock %}
+
+{% include "nav.html" %}
+
+{% block content %}
+<div class="row text-center m-4 p-5">
+    <div class="col-md-6 p-3">
+        <div class="card bg-dark text-white shadow rounded-4">
+            <div class="card-body py-5">
+                <h5 class="mb-5">Your Reservations</h5>
+                <h2>{{ total_reservations }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 p-3">
+        <div class="card bg-dark text-white shadow rounded-4">
+            <div class="card-body py-5">
+                <h5 class="mb-5">Active Reservations</h5>
+                <h2>{{ active_reservations }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 p-3">
+        <div class="card bg-dark text-white shadow rounded-4">
+            <div class="card-body py-5">
+                <h5 class="mb-5">Total ₹ Spent</h5>
+                <h2>₹{{ total_price_spent }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 p-3">
+        <div class="card bg-dark text-white shadow rounded-4">
+            <div class="card-body py-5">
+                <h5 class="mb-5">Time Parked (hrs)</h5>
+                <h2>{{ total_hours_parked }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const canvas = document.getElementById('chart');
+        const ctx = canvas.getContext('2d');
+        
+        const labelsData = canvas.getAttribute('data-labels');
+        const valuesData = canvas.getAttribute('data-values');
+        
+        const labels = labelsData ? labelsData.split(',') : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const data = valuesData ? valuesData.split(',').map(Number) : [12, 19, 3, 5, 2, 3, 9];
+        
+        const config = {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Reservations per Day',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#fff' },
+                        grid: { color: '#444' }
+                    },
+                    x: {
+                        ticks: { color: '#fff' },
+                        grid: { color: '#444' }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#fff' } }
+                }
+            }
+        };
+        
+        new Chart(ctx, config);
+    });
+</script>
+{% endblock %}

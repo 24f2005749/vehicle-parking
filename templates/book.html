@@ -67,7 +67,12 @@ Booking Page
               value="{{ lot.free_spot.ps_id if lot.free_spot else 'Not available' }}" readonly>
           </div>
 
-       
+          <div class="mb-3">
+            <label class="form-label">Spot Price</label>
+            <input type="text" class="form-control bg-dark text-white border-secondary" name="spot_price"
+              value="{{ lot.pl_price if lot.free_spot else 'Not available' }}" readonly>
+          </div>
+
           <div class="mb-3">
             <label class="form-label">Vehicle Number</label>
             <input type="text" class="form-control bg-dark text-white border-secondary" name="vehicle" required>

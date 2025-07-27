@@ -1,0 +1,106 @@
+{% extends 'layout.html' %}
+{% block title %}
+Admin Summary
+{% endblock %}
+
+{% include "admin/nav-admin.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4 text-center">Admin Summary</h2>
+
+    <div class="row text-center mb-4">
+        <div class="col-md-3">
+            <div class="card bg-dark text-white shadow rounded-4">
+                <div class="card-body">
+                    <h5>Total Reservations</h5>
+                    <h2>{{ total_reservations }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white shadow rounded-4">
+                <div class="card-body">
+                    <h5>Active Reservations</h5>
+                    <h2>{{ active_reservations }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white shadow rounded-4">
+                <div class="card-body">
+                    <h5>Total Users</h5>
+                    <h2>{{ total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white shadow rounded-4">
+                <div class="card-body">
+                    <h5>Total Lots</h5>
+                    <h2>{{ total_lots }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-dark text-white shadow rounded-4">
+        <div class="card-body">
+            <h4 class="card-title text-center">Reservation Overview</h4>
+            <canvas id="chart" height="100" 
+                    data-labels="{% if chart_labels %}{{ chart_labels|join(',') }}{% else %}Mon,Tue,Wed,Thu,Fri,Sat,Sun{% endif %}"
+                    data-values="{% if chart_data %}{{ chart_data|join(',') }}{% else %}12,19,3,5,2,3,9{% endif %}"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const canvas = document.getElementById('chart');
+        const ctx = canvas.getContext('2d');
+        
+        const labelsData = canvas.getAttribute('data-labels');
+        const valuesData = canvas.getAttribute('data-values');
+        
+        const labels = labelsData ? labelsData.split(',') : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const data = valuesData ? valuesData.split(',').map(Number) : [12, 19, 3, 5, 2, 3, 9];
+        
+        const config = {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Reservations per Day',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#fff' },
+                        grid: { color: '#444' }
+                    },
+                    x: {
+                        ticks: { color: '#fff' },
+                        grid: { color: '#444' }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#fff' } }
+                }
+            }
+        };
+        
+        new Chart(ctx, config);
+    });
+</script>
+{% endblock %}
