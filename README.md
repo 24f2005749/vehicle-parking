@@ -5,3 +5,6 @@ This app aims to ease the process of finding and parking on spot across many des
 A basic Flask web application with user and admin login, session handling, and database integration using SQLAlchemy. The project uses environment variables for configuration and follows a modular structure with templates and models separated.
 
 To run the app, set up a virtual environment, install the dependencies, configure the `.env` file, and run `app.py`.
+
+Here is a demo video of the project: [Click here](https://drive.google.com/file/d/1aqssogkvOXlIhdmeXllthIzn8s3EPeEA/view?usp=sharing)
+
