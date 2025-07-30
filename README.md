@@ -1,4 +1,6 @@
-# Parking Lot Management System
+# VehiPark - A vehicle parking app
+
+This app aims to ease the process of finding and parking on spot across many destinations.
 
 A basic Flask web application with user and admin login, session handling, and database integration using SQLAlchemy. The project uses environment variables for configuration and follows a modular structure with templates and models separated.
 
