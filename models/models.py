@@ -34,7 +34,7 @@ class Admin(db.Model):
     adm_name = db.Column(db.String(20))
 
 class ParkingLot(db.Model):
-    pl_id = db.Column(db.Integer, primary_key=True)
+    pl_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     pl_location = db.Column(db.String(30), nullable=False)
     pl_add = db.Column(db.String(80), nullable=False)
     pl_pin = db.Column(db.Integer, nullable=False)

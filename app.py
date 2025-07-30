@@ -17,7 +17,7 @@ def make_session_permanent():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        existing_admin = Admin.query.filter_by(adm_username="admin").first()
+        existing_admin = Admin.query.filter_by(adm_username=app.config['ADMIN_USERNAME']).first()
         if not existing_admin:
             password =  app.config['ADMIN_PASSWORD']
             passhash=generate_password_hash(password)

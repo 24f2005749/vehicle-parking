@@ -63,15 +63,10 @@ Admin Dashboard
             <span class="fw-bold me-1">Total Spots:</span>
             <p>{{lot.pl_spots}}</p>
             <span class="fw-bold ms-3 me-1" style="color: #00c853;">Available Spots:</span>
-            {% set navail = 0 %}
-            {% for spot in spots %}
-              {% if spot.pl_id == lot.pl_id and not spot.ps_status %}
-                {% set navail = navail + 1 %}
-              {% endif %}
-            {% endfor %}
-            <p>{{lot.pl_spots - navail}}</p>
+            
+            <p>{{avail[lot.pl_id]}}</p>
             <span class="fw-bold ms-3 me-1 "style="color:#ff5252">Occupied Spots:</span>
-            <p>{{navail}}</p>
+            <p>{{lot.pl_spots - avail[lot.pl_id]}}</p>
           </div>
 
           <div class="d-flex"><span class="fw-bold me-1">Price:</span>

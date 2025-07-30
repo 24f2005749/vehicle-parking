@@ -218,7 +218,7 @@ def summary():
     for res in reservations:
         if res.end_time and res.start_time:
             duration = (res.end_time - res.start_time).total_seconds() / 3600
-        elif res.start_time:  # Still ongoing
+        elif res.start_time:
             duration = (datetime.now() - res.start_time).total_seconds() / 3600
         else:
             duration = 0
@@ -283,9 +283,14 @@ def admin():
         lots = ParkingLot.query.all()              
         spots = ParkingSpot.query.all()
         lot_prices = {lot.pl_id: lot.pl_price for lot in lots}
+        
+        avail = {lot.pl_id: 0 for lot in lots}
+        for spot in spots:
+            if not spot.ps_status:
+                avail[spot.pl_id] += 1
 
         
-        return render_template("admin/admin-dashboard.html", lots=lots, spots=spots, lot_prices=lot_prices)
+        return render_template("admin/admin-dashboard.html", lots=lots, spots=spots, lot_prices=lot_prices,avail=avail)
 
 @app.route("/admin/users")
 @admin_required
@@ -293,25 +298,50 @@ def viewUsers():
     users=User.query.all()
     return render_template("admin/users.html",users=users)
 
-@app.route("/admin/edit/<int:pl_id>",methods=["POST"])
+@app.route("/admin/edit/<int:pl_id>", methods=["POST"])
 @admin_required
 def editLot(pl_id):
     lot = ParkingLot.query.filter_by(pl_id=pl_id).first()
     if not lot:
         flash("Parking lot not found.", "danger")
         return redirect(url_for("admin"))
-    
+
     lot.pl_location = request.form.get("location")
     lot.pl_add = request.form.get("address")
     lot.pl_pin = int(request.form.get("pincode"))
     lot.pl_price = int(request.form.get("price"))
-    lot.pl_spots = int(request.form.get("numspots"))
+    
+    new_total_spots = int(request.form.get("numspots"))
+    current_spots = ParkingSpot.query.filter_by(pl_id=pl_id).all()
+    current_count = len(current_spots)
+
+    if new_total_spots > current_count:
+        for i in range(new_total_spots - current_count):
+            new_spot = ParkingSpot(pl_id=pl_id)
+            db.session.add(new_spot)
+    
+
+    elif new_total_spots < current_count:
+
+        removable_spots = ParkingSpot.query.filter(
+            ParkingSpot.pl_id == pl_id,
+            ~ParkingSpot.reservation.any(Reservation.status == True)
+        ).order_by(ParkingSpot.ps_id.desc()).all()
+
+        spots_to_remove = removable_spots[: current_count - new_total_spots]
+
+        if len(spots_to_remove) < (current_count - new_total_spots):
+            flash("Cannot delete spots: Some are reserved", "danger")
+            return redirect(url_for("admin"))
+
+        for spot in spots_to_remove:
+            db.session.delete(spot)
+
+    lot.pl_spots = new_total_spots
 
     db.session.commit()
-
     flash("Parking lot updated successfully.", "success")
     return redirect(url_for("admin"))
-
 @app.route("/admin/delete/<int:pl_id>", methods=["POST"])
 @admin_required
 def deleteLot(pl_id):
@@ -358,4 +388,3 @@ def adminSummary():
                            total_lots=total_lots,
                            chart_labels=chart_labels,
                            chart_data=chart_data)
-
