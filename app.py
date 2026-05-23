@@ -14,14 +14,15 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 def make_session_permanent():
     session.permanent = True 
 
+
+with app.app_context():
+    db.create_all()
+    existing_admin = Admin.query.filter_by(adm_username=app.config['ADMIN_USERNAME']).first()
+    if not existing_admin:
+        password =  app.config['ADMIN_PASSWORD']
+        passhash=generate_password_hash(password)
+        admin = Admin(adm_username=app.config['ADMIN_USERNAME'],adm_passhash=passhash)
+        db.session.add(admin)
+        db.session.commit()
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        existing_admin = Admin.query.filter_by(adm_username=app.config['ADMIN_USERNAME']).first()
-        if not existing_admin:
-            password =  app.config['ADMIN_PASSWORD']
-            passhash=generate_password_hash(password)
-            admin = Admin(adm_username=app.config['ADMIN_USERNAME'],adm_passhash=passhash)
-            db.session.add(admin)
-            db.session.commit()
     app.run(port=8080)
