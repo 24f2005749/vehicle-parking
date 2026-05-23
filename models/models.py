@@ -22,7 +22,7 @@ def enforce_foreign_keys(dbapi_connection, connection_record):
 class User(db.Model):
     u_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
-    passhash = db.Column(db.String(20), nullable=False)
+    passhash = db.Column(db.String(255), nullable=False)
     u_name = db.Column(db.String(20), nullable=False)
     u_add = db.Column(db.String(80), nullable=False)
     u_pin = db.Column(db.Integer, nullable=False)
@@ -30,7 +30,7 @@ class User(db.Model):
 class Admin(db.Model):
     adm_id = db.Column(db.Integer, primary_key=True)
     adm_username = db.Column(db.String(20), unique=True, nullable=False)
-    adm_passhash = db.Column(db.String(20), nullable=False)
+    adm_passhash = db.Column(db.String(255), nullable=False)
     adm_name = db.Column(db.String(20))
 
 class ParkingLot(db.Model):
