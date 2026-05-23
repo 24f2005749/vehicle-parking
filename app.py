@@ -6,10 +6,11 @@ from datetime import timedelta
 
 app.config.from_object(Config)
 
+
 db.init_app(app)
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
-
+print(app.config["SQLALCHEMY_DATABASE_URI"])
 @app.before_request
 def make_session_permanent():
     session.permanent = True 
