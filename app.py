@@ -24,4 +24,4 @@ if __name__ == '__main__':
             admin = Admin(adm_username=app.config['ADMIN_USERNAME'],adm_passhash=passhash)
             db.session.add(admin)
             db.session.commit()
-    app.run(debug=True, port=8080)
+    app.run(port=8080)
